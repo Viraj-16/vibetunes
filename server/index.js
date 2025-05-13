@@ -1,14 +1,62 @@
-// server/index.js
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('VibeTunes backend is running!');
+const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+
+async function getAccessToken() {
+  const response = await axios.post(
+    'https://accounts.spotify.com/api/token',
+    'grant_type=client_credentials',
+    {
+      headers: {
+        Authorization:
+          'Basic ' +
+          Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }
+  );
+  return response.data.access_token;
+}
+
+app.get('/api/generate-playlist', async (req, res) => {
+  const mood = req.query.mood || 'happy';
+
+  const genreMap = {
+    happy: ['pop', 'dance', 'happy'],
+    sad: ['acoustic', 'piano', 'indie'],
+    angry: ['rock', 'metal', 'trap'],
+    relaxed: ['chill', 'ambient', 'lofi'],
+    neutral: ['alternative', 'folk', 'indie']
+  };
+
+  try {
+    const accessToken = await getAccessToken();
+    const genres = genreMap[mood] || genreMap['neutral'];
+    const query = genres.join('%20');
+
+    const response = await axios.get(
+      `https://api.spotify.com/v1/search?q=${query}&type=playlist&limit=1`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const playlist = response.data.playlists.items[0];
+    res.json({ playlist });
+  } catch (error) {
+    console.error('Spotify API error:', error.message);
+    res.status(500).json({ error: 'Failed to generate playlist' });
+  }
 });
 
 const PORT = process.env.PORT || 5000;

@@ -1,0 +1,7 @@
+{
+    "happy": ["happy", "excited", "great", "joy", "glad", "thrilled"],
+    "sad": ["sad", "tired", "depressed", "down", "unhappy", "mournful"],
+    "angry": ["angry", "frustrated", "annoyed", "irate", "furious"],
+    "relaxed": ["calm", "relaxed", "chill", "peaceful", "serene"]
+  }
+  
