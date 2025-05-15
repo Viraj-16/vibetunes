@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,7 @@ app.use(express.json());
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
+// Spotify token generator
 async function getAccessToken() {
   const response = await axios.post(
     'https://accounts.spotify.com/api/token',
@@ -26,6 +28,7 @@ async function getAccessToken() {
   return response.data.access_token;
 }
 
+// Generate playlist route
 app.get('/api/generate-playlist', async (req, res) => {
   const mood = req.query.mood || 'happy';
 
@@ -59,5 +62,11 @@ app.get('/api/generate-playlist', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Connect to MongoDB first, then start server
+mongoose.connect(process.env.MONGODB_URI)
+.then(() => {
+  console.log("Connected to MongoDB");
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+})
+.catch((err) => console.error("MongoDB connection error:", err));

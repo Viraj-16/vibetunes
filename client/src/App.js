@@ -15,6 +15,8 @@ function App() {
     try {
       const playlistResult = await fetchPlaylist(moodResult);
       setPlaylist(playlistResult);
+      console.log("Returned playlist:", playlistResult);
+
     } catch (err) {
       console.error("Error fetching playlist:", err);
       setPlaylist(null);
@@ -46,26 +48,28 @@ function App() {
         </div>
       )}
 
-      {playlist && (
-        <div className="mt-6 text-center">
-          <h2 className="text-xl font-semibold mb-2">Suggested Playlist</h2>
-          <a
-            href={playlist.external_urls.spotify}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block"
-          >
-            <div className="transform hover:scale-105 transition-transform duration-200">
-              <h3 className="text-2xl font-bold text-blue-600 hover:text-blue-800">
-                {playlist.name}
-              </h3>
-              <p className="mt-2 text-sm text-gray-600 hover:text-gray-800">
-                Click to open on Spotify
-              </p>
-            </div>
-          </a>
-        </div>
-      )}
+      {playlist?.name && (
+  <div className="mt-6 text-center max-w-md w-full bg-white p-4 shadow rounded">
+    <h2 className="text-xl font-semibold mb-2">Suggested Playlist</h2>
+    {playlist.images && playlist.images[0] && (
+      <img
+        src={playlist.images[0].url}
+        alt={playlist.name}
+        className="mx-auto mb-3 rounded"
+      />
+    )}
+    <p className="mb-2 font-bold">{playlist.name}</p>
+    <a
+      href={playlist.external_urls.spotify}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline"
+    >
+      Open on Spotify →
+    </a>
+  </div>
+)}
+
     </div>
   );
 }
