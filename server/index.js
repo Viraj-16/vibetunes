@@ -70,3 +70,27 @@ mongoose.connect(process.env.MONGODB_URI)
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 })
 .catch((err) => console.error("MongoDB connection error:", err));
+
+const History = require('./models/history');
+
+app.post('/api/save-history', async (req, res) => {
+  try {
+    const { mood, playlist } = req.body;
+
+    const entry = new History({
+      mood,
+      playlist: {
+        name: playlist.name,
+        id: playlist.id,
+        url: playlist.external_urls.spotify,
+        image: playlist.images?.[0]?.url || '',
+      },
+    });
+
+    await entry.save();
+    res.status(201).json({ message: 'History saved' });
+  } catch (err) {
+    console.error('Error saving history:', err.message);
+    res.status(500).json({ error: 'Failed to save history' });
+  }
+});
